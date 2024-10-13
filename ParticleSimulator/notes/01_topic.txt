@@ -1,0 +1,116 @@
+Particle simulator 
+
+Goals:
+	Performance		- 
+	Capacity		- lots of particles (1M+)
+	Extensibility	- 
+
+Classes:
+	- Particle
+		- position (x, y)
+		- velocity (x, y)
+		- orientation (theta)
+		- angular velocity (omega)
+		- temperature
+		- type
+
+		Polymorphic???
+			A particle for each element?
+			Some particles can have customizable forces between them
+			ex: A is attracted to B 
+				B is attracted to A
+				A is attracted to C
+				C is repulsed by A
+				B is repulsed by C
+				C is repulsed by B
+			ex:
+				electron
+				proton
+
+
+	- Cloud
+		container of particles
+		need way to efficiently insert and remove
+			order is never relevant
+
+	- UI
+		Show particles
+			colors
+				- particle type (element)
+				- speed
+				- temperature
+			trails
+				- speed trails
+			ambiance
+				- glow
+			sparcles
+				- for fusion
+
+		bounding box
+			fixed
+			user controlled
+			automatic
+				single specific particle
+					- trailed
+					- locked
+				cloud center of mass
+		Show grid lines or markers
+
+	- Factory
+		Creates Particles and Clouds
+	
+	- Engine
+		Forces (all these should be selectable without performance penalties)
+			- Gravity
+				gravitational constant
+				distance
+				mass
+
+			- Electromagnetic
+				electromagnetic constant
+				distance
+				charge
+				attracts up close
+				repelse when too close
+
+			- Friction
+				Speed
+				Mass
+				Constant
+
+			- Temperature
+				Force of Friction * distance increases temperature
+				Temperature 
+
+			- Fusion?????????!!!!!!!!!!!!!!!!!!!
+				When two particles get two close, they are replaced with 
+				a different one. 
+				And some energy is created somehow
+				Maybe a new particle is respawned somewhere else but with
+				very little energy.
+
+			- Bounding Box
+				What happens when particles leaves the simulation area?
+					- Continues to move until position becomes inf
+					- Is destroyed
+					- Is destroyed and regenerated
+
+			- Collisions?
+
+			- External Forces (external to simulator)
+				- weather taken from weather api can affect simulator
+					- Temperature:
+						decreases:
+							increases electromagnetic constants
+							friction coefficients
+					- Humidity
+						decreases:
+							friction coefficients
+					- Moon phase:
+					- Tides:
+					- Wind:
+						
+				- weather can be based on location
+					must be optional (code should be able to run without it)
+		Destroy some particles
+		Regenerate destroyed particles

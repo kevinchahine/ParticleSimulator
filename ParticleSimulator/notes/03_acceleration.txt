@@ -1,0 +1,29 @@
+Hardware acceleration depends on Cloud container:
+
+Cloud
+	vector<Particles>
+
+	acceleration methods:
+		CPU:
+			- Partition and process
+			- Producer Consumer (probably too slow for this)
+		GPU:
+			- Needs matrix only operations
+		(we can make two versions):
+			1.) CPU version (especially good for correctness)
+			2.) GPU version (especially good for performance)
+		For a way to bridge between them, we need to think of pytorch.
+			Have a Particle class which stores either:
+				ParticleCPU
+				ParticleGPU
+
+Force Pipeline:
+	Start:	Cloud [ (x, y, theta, omega, mass, charge, type) ]
+	Gravity:
+	Friction:
+	Electromagnetic:
+	Custom:
+	BoundingBox:
+	Destroy:
+	Regenerate:
+
