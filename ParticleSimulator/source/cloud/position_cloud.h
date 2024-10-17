@@ -14,4 +14,8 @@ public:
 	virtual ~PositionCloud() noexcept = default;
 	PositionCloud & operator=(const PositionCloud &) = default;
 	PositionCloud & operator=(PositionCloud &&) noexcept = default;
+
+	cv::Mat1f calcDistance() const;
+
+	cv::Mat1f calcSquareDistance() const;
 }; // class PositionCloud

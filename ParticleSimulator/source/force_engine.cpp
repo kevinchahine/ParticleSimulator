@@ -54,35 +54,42 @@ ForceCloud ForceEngine::calcGravitationalForce(Cloud & cloud) {
 	numerator *= Constants::gravitational;
 	
 	// --- Denominator ---
-	cv::Mat1f xPos = cloud.position()(cv::Range(0, N_PARTICLES), cv::Range(0, 1));
-	cv::Mat1f yPos = cloud.position()(cv::Range(0, N_PARTICLES), cv::Range(1, 2));
-
+	cv::Mat1f xPos = cloud.position().sliceX();// (cv::Range(0, N_PARTICLES), cv::Range(0, 1));
+	cv::Mat1f yPos = cloud.position().sliceY();// (cv::Range(0, N_PARTICLES), cv::Range(1, 2));
+	
 	cv::Mat1f xPosRight = cv::repeat(xPos, 1, N_PARTICLES);
 	cv::Mat1f xPosDown;
 	cv::rotate(xPos, xPosDown, cv::ROTATE_90_COUNTERCLOCKWISE);
 	xPosDown = cv::repeat(xPosDown, N_PARTICLES, 1);
-
+	
 	cv::Mat1f yPosRight = cv::repeat(yPos, 1, N_PARTICLES);
 	cv::Mat1f yPosDown;
 	cv::rotate(yPos, yPosDown, cv::ROTATE_90_COUNTERCLOCKWISE);
 	yPosDown = cv::repeat(yPosDown, N_PARTICLES, 1);
-
+	
 	// TODO: maybe its backwards
-	cv::Mat1f xDiff = xPosRight - xPosDown;
-	cv::Mat1f yDiff = yPosRight - yPosDown;
-
+	cv::Mat1f xDiff;
+	cv::Mat1f yDiff;
+	
+	cv::subtract(xPosRight, xPosDown, xDiff);
+	cv::subtract(yPosRight, yPosDown, yDiff);
+	
 	// --- Square the Differences ---
 	cv::Mat1f xDiffSquared;
 	cv::Mat1f yDiffSquared;
-
+	
 	cv::multiply(xDiff, xDiff, xDiffSquared);
 	cv::multiply(yDiff, yDiff, yDiffSquared);
-
+	
 	// d^2
-	cv::Mat1f distMagnitudeSquared = xDiffSquared + yDiffSquared;
-
+	cv::Mat1f distMagnitudeSquared;
+	cv::add(xDiffSquared, yDiffSquared, distMagnitudeSquared);
+	
 	cv::Mat1f distMagnitude;
 	cv::sqrt(distMagnitudeSquared, distMagnitude);
+
+	// TODO: try to replace above code with this call. Try.
+	//cv::Mat1f distMagnitude = cloud.position().calcDistance();
 
 	// Force Magnitude
 	cv::Mat1f forceMagnitude;
@@ -126,7 +133,9 @@ ForceCloud ForceEngine::calcGravitationalForce(Cloud & cloud) {
 ForceCloud ForceEngine::calcSpringForce(Cloud & cloud) {
 	const int N_PARTICLES = cloud.nParticles();
 
-	
+	cv::Mat1f distance = cloud.position().calcDistance();
+
+	cv::Mat1f elasticForce = distance * -5.0f;
 
 	ForceCloud force;
 

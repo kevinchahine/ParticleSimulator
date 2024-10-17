@@ -17,7 +17,7 @@ int main() {
 	cv::Point2f halfSizePoint{ 500, 300 };
 
 	FactoryOptions ops;
-	ops.nParticles(3);
+	ops.nParticles(100);
 	ops.massConstant(1.0f);
 	ops.positionUniformCentered(halfSizePoint, cv::Size{ 500, 500 });
 	ops.velocityConstant(0.0f, 0.0f);
