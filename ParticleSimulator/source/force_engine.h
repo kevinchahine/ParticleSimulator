@@ -30,6 +30,16 @@ private:
 	///				to each particle in the cloud.
 	ForceCloud calcGravitationalForce(Cloud & cloud);
 
+	/// @brief		Calculates the Spring-Mass-Damper force applied to each
+	///				particle in the cloud.
+	/// @param		cloud A Cloud which contains mass and element type
+	/// @return		A ForceCloud
+	ForceCloud calcSpringMassDamperForce(Cloud & cloud);
+
+	ForceCloud calcSpringForce(Cloud & cloud);
+
+	ForceCloud calcDamperForce(Cloud & cloud);
+
 	ForceCloud calcFrictionForce(Cloud & cloud);
 
 	AccelerationCloud calcAcceleration(

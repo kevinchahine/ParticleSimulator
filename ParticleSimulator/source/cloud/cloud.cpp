@@ -29,21 +29,21 @@ using namespace std;
 Cloud Cloud::clone() const {
 	Cloud c;
 
-	static_cast<ChargeCloud &>(c) = this->ChargeCloud::clone();
-	static_cast<ElementCloud &>(c) = this->ElementCloud::clone();
-	static_cast<MassCloud &>(c) = this->MassCloud::clone();
-	static_cast<PositionCloud &>(c) = this->PositionCloud::clone();
-	static_cast<VelocityCloud &>(c) = this->VelocityCloud::clone();
+	c._charge = this->_charge.clone();
+	c._element = this->_element.clone();
+	c._mass = this->_mass.clone();
+	c._position = this->_position.clone();
+	c._velocity = this->_velocity.clone();
 
 	return c;
 }
 
 void Cloud::resize(size_t size) {
-	static_cast<ChargeCloud &>(*this).resize(size);
-	static_cast<ElementCloud &>(*this).resize(size);
-	static_cast<MassCloud &>(*this).resize(size);
-	static_cast<PositionCloud &>(*this).resize(size);
-	static_cast<VelocityCloud &>(*this).resize(size);
+	_charge.resize(size);
+	_element.resize(size);
+	_mass.resize(size);
+	_position.resize(size);
+	_velocity.resize(size);
 }
 
 // ============================================================================
@@ -51,25 +51,25 @@ void Cloud::resize(size_t size) {
 // ============================================================================
 
 cv::Point2f Cloud::Particle::position() const {
-	const PositionCloud & pos = _cloudPtr->positionCloud();
+	const PositionCloud & pos = _cloudPtr->position();
 
 	return pos.at(_index);}
 
 void Cloud::Particle::position(const cv::Point2f & position) {
-	PositionCloud & pos = _cloudPtr->positionCloud();
+	PositionCloud & pos = _cloudPtr->position();
 	pos.at(_index, position);}
 
 cv::Point2f Cloud::Particle::velocity() const {
-	const VelocityCloud & vel = _cloudPtr->velocityCloud();	return vel.at(_index);}
+	const VelocityCloud & vel = _cloudPtr->velocity();	return vel.at(_index);}
 
 void Cloud::Particle::velocity(const cv::Point2f & velocity) {
-	VelocityCloud & vel = _cloudPtr->velocityCloud();	vel.at(_index, velocity);}
+	VelocityCloud & vel = _cloudPtr->velocity();	vel.at(_index, velocity);}
 
 float Cloud::Particle::mass() const {
-	const MassCloud & mass = _cloudPtr->massCloud();	return mass.at(_index);}
+	const MassCloud & mass = _cloudPtr->mass();	return mass.at(_index);}
 
 void Cloud::Particle::mass(float mass) {
-	MassCloud & massCloud = _cloudPtr->massCloud();	massCloud.at(_index, mass);}
+	MassCloud & massCloud = _cloudPtr->mass();	massCloud.at(_index, mass);}
 
 // ============================================================================
 // ========================== class iterator ==================================

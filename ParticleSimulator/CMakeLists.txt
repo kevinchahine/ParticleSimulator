@@ -1,5 +1,9 @@
 ﻿set (APP_NAME ParticleSimulator)
 
+set (CONFIG
+	"config/force_constants_01.yaml"
+)
+
 set (CLOUD
 	"source/cloud/cloud.hpp"
 	"source/cloud/acceleration_cloud.h"
@@ -8,7 +12,6 @@ set (CLOUD
 	"source/cloud/charge_cloud.h"
 	"source/cloud/cloud.cpp"
 	"source/cloud/cloud.h"
-	
 	"source/cloud/cloud_template.h"
 	"source/cloud/cloud_template_1.h"
 	"source/cloud/cloud_template_2.h"
@@ -33,6 +36,8 @@ set (SOURCE
 	"source/factory/factory.h"
 	"source/factory/factory_options.cpp"
 	"source/factory/factory_options.h"
+	"source/constants.cpp"
+	"source/constants.h"
 	"source/force_engine.cpp"
 	"source/force_engine.h"
 	"source/globals.cpp"
@@ -57,6 +62,7 @@ set (NOTES
 )
 
 add_executable (${APP_NAME}
+	${CONFIG}
 	${CLOUD}
 	${SOURCE}
 	${UI}

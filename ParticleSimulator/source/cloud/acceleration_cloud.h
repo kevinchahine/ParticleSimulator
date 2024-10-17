@@ -14,7 +14,4 @@ public:
 	virtual ~AccelerationCloud() noexcept = default;
 	AccelerationCloud & operator=(const AccelerationCloud &) = default;
 	AccelerationCloud & operator=(AccelerationCloud &&) noexcept = default;
-
-	cv::Mat1f & acceleration() { return static_cast<super_t &>(*this); };
-	const cv::Mat1f & acceleration() const { return static_cast<const super_t &>(*this); };
 }; // class AccelerationCloud

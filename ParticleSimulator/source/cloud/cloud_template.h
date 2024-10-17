@@ -38,6 +38,9 @@ public:
 	int nAttributes() const { return this->cols; } // _data.cols; }
 
 	DERIVED_T clone() const;
+
+	MATRIX_T & mat() { return static_cast<MATRIX_T &>(*this); }
+	const MATRIX_T & mat() const { return static_cast<const MATRIX_T &>(*this); }
 }; // class AccelerationCloud
 
 template<typename MATRIX_T, typename DERIVED_T>

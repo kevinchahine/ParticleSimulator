@@ -30,6 +30,7 @@ public:
 	using CloudTemplate<MATRIX_T, DERIVED_T>::at;
 
 	cv::Point2f centroid() const;
+
 }; // class CloudTemplate2
 
 template<typename MATRIX_T, typename DERIVED_T>

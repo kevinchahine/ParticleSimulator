@@ -14,52 +14,49 @@
 /// dim 1:	attribute of particle
 ///		columns:
 ///			- 0 position x
-class Cloud :
-	public ChargeCloud,
-	public ElementCloud,
-	public MassCloud,
-	public PositionCloud,
-	public VelocityCloud
+class Cloud
 {
 public:
 	Cloud() :
 		Cloud(0) {}
 	Cloud(int nParticles) :
-		ChargeCloud(nParticles),
-		ElementCloud(nParticles),
-		MassCloud(nParticles),
-		PositionCloud(nParticles),
-		VelocityCloud(nParticles) {}
+		_charge(nParticles),
+		_element(nParticles),
+		_mass(nParticles),
+		_position(nParticles),
+		_velocity(nParticles) {}
 	Cloud(const Cloud &) = default;
 	Cloud(Cloud &&) noexcept = default;
 	virtual ~Cloud() noexcept = default;
 	Cloud & operator=(const Cloud &) = default;
 	Cloud & operator=(Cloud &&) noexcept = default;
 
-	//super_t::iterator erase(super_t::iterator & pos);
-	//super_t::iterator erase(
-	//	super_t::iterator first,
-	//	super_t::iterator last
-	//);
-
 	Cloud clone() const;
 
 	void resize(size_t size);
 
-	size_t nParticles() const { return (size_t) this->position().rows; }
+	size_t nParticles() const { return (size_t) _position.rows; }
 
-	ChargeCloud & chargeCloud() { return static_cast<ChargeCloud &>(*this); }
-	ElementCloud & elementCloud() { return static_cast<ElementCloud &>(*this); }
-	MassCloud & massCloud() { return static_cast<MassCloud &>(*this); }
-	PositionCloud & positionCloud() { return static_cast<PositionCloud &>(*this); }
-	VelocityCloud & velocityCloud() { return static_cast<VelocityCloud &>(*this); }
-	
-	const ChargeCloud & chargeCloud() const { return static_cast<const ChargeCloud &>(*this); }
-	const ElementCloud & elementCloud() const { return static_cast<const ElementCloud &>(*this); }
-	const MassCloud & massCloud() const { return static_cast<const MassCloud &>(*this); }
-	const PositionCloud & positionCloud() const { return static_cast<const PositionCloud &>(*this); }
-	const VelocityCloud & velocityCloud() const { return static_cast<const VelocityCloud &>(*this); }
+	ChargeCloud & charge() { return _charge; }
+	ElementCloud & element() { return _element; }
+	MassCloud & mass() { return _mass; }
+	PositionCloud & position() { return _position; }
+	VelocityCloud & velocity() { return _velocity; }
 
+	const ChargeCloud & charge() const { return _charge; }
+	const ElementCloud & element() const { return _element; }
+	const MassCloud & mass() const { return _mass; }
+	const PositionCloud & position() const { return _position; }
+	const VelocityCloud & velocity() const { return _velocity; }
+
+private:
+	ChargeCloud _charge;
+	ElementCloud _element;
+	MassCloud _mass;
+	PositionCloud _position;
+	VelocityCloud _velocity;
+
+public:
 	// ===========================================================================
 	// ========================= class Particle ==================================
 	// ===========================================================================

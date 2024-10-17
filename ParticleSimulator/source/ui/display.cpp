@@ -33,7 +33,7 @@ void Display::show(int delayMS) {
 }
 
 void Display::setCenter(const Cloud & cloud) {
-	_particleSpaceCenter = cloud.positionCloud().centroid();
+	_particleSpaceCenter = cloud.position().centroid();
 }
 
 void Display::renderBackground(cv::Mat & img) {
@@ -69,7 +69,7 @@ void Display::renderMarkers(cv::Mat & img) {
 }
 
 void Display::renderCentroid(cv::Mat & img) {
-	cv::Point2f centroid = currentCloud->positionCloud().centroid();
+	cv::Point2f centroid = currentCloud->position().centroid();
 
 	cv::circle(img, centroid, 1, cv::Scalar{ 0, 0, 255 });
 }

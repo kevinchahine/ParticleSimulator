@@ -1,7 +1,7 @@
 #pragma once
 
 #include "force_engine.h"
-
+#include "constants.h"
 #include "stop_watch.h"
 
 using namespace std;
@@ -17,12 +17,12 @@ void ForceEngine::initializeCloud(Cloud && cloud) {
 void ForceEngine::update() {
 	ForceCloud force = this->calcGravitationalForce(_cloud);
 
-	AccelerationCloud accel = this->calcAcceleration(force, _cloud.massCloud());
+	AccelerationCloud accel = this->calcAcceleration(force, _cloud.mass());
 
 	VelocityCloud deltaVelocity = this->calcVelocityChange(accel);
 	this->applyVelocity(deltaVelocity);
 
-	PositionCloud deltaPosition = this->calcPositionChange(_cloud.velocityCloud());
+	PositionCloud deltaPosition = this->calcPositionChange(_cloud.velocity());
 	this->applyPosition(deltaPosition);
 }
 
@@ -43,15 +43,15 @@ ForceCloud ForceEngine::calcGravitationalForce(Cloud & cloud) {
 
 	// --- Numerator ---
 	// numerator = -G * m1 * m2
-	static cv::Mat1f massRight = cv::repeat(cloud.mass(), 1, N_PARTICLES);
+	cv::Mat1f massRight = cv::repeat(cloud.mass(), 1, N_PARTICLES);
 	
-	static cv::Mat1f massDown;
+	cv::Mat1f massDown;
 	cv::rotate(cloud.mass(), massDown, cv::ROTATE_90_COUNTERCLOCKWISE);
 	massDown = cv::repeat(massDown, N_PARTICLES, 1);
 
 	cv::Mat1f numerator;
 	cv::multiply(massRight, massDown, numerator);
-	numerator *= -5000.0;
+	numerator *= Constants::gravitational;
 	
 	// --- Denominator ---
 	cv::Mat1f xPos = cloud.position()(cv::Range(0, N_PARTICLES), cv::Range(0, 1));
@@ -123,8 +123,14 @@ ForceCloud ForceEngine::calcGravitationalForce(Cloud & cloud) {
 	return force;
 }
 
-ForceCloud ForceEngine::calcFrictionForce(Cloud & cloud) {
-	return ForceCloud();
+ForceCloud ForceEngine::calcSpringForce(Cloud & cloud) {
+	const int N_PARTICLES = cloud.nParticles();
+
+	
+
+	ForceCloud force;
+
+	return force;
 }
 
 AccelerationCloud ForceEngine::calcAcceleration(
@@ -135,7 +141,7 @@ AccelerationCloud ForceEngine::calcAcceleration(
 
 	cv::Mat massRepeated = cv::repeat(mass, 1, 2);
 
-	cv::divide(force, massRepeated, accel.acceleration());
+	cv::divide(force, massRepeated, accel);
 
 	return accel;
 }
@@ -143,7 +149,7 @@ AccelerationCloud ForceEngine::calcAcceleration(
 VelocityCloud ForceEngine::calcVelocityChange(const AccelerationCloud & accel) {
 	VelocityCloud velocity;
 	
-	velocity.velocity() = accel * _frameDuration;
+	velocity.mat() = accel * _frameDuration;
 
 	// TODO: Trapezoidal Approximation
 	// TODO: Simpsons Rule
@@ -152,7 +158,7 @@ VelocityCloud ForceEngine::calcVelocityChange(const AccelerationCloud & accel) {
 }
 
 void ForceEngine::applyVelocity(const VelocityCloud & deltaVelocity) {
-	cv::add(_cloud.velocity(), deltaVelocity.velocity(), _cloud.velocity());
+	cv::add(_cloud.velocity(), deltaVelocity.mat(), _cloud.velocity());
 }
 
 PositionCloud ForceEngine::calcPositionChange(const VelocityCloud & velocity) {
@@ -160,11 +166,11 @@ PositionCloud ForceEngine::calcPositionChange(const VelocityCloud & velocity) {
 
 	// TODO: Trapezoidal Approximation
 	// TODO: Simpsons Rule
-	deltaPosition.position() = velocity.velocity() * _frameDuration;
+	deltaPosition.mat() = velocity.mat() * _frameDuration;
 
 	return deltaPosition;
 }
 
 void ForceEngine::applyPosition(const PositionCloud & deltaPosition) {
-	cv::add(_cloud.position(), deltaPosition.position(), _cloud.position());
+	cv::add(_cloud.position(), deltaPosition.mat(), _cloud.position());
 }

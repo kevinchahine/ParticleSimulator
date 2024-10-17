@@ -17,10 +17,9 @@ int main() {
 	cv::Point2f halfSizePoint{ 500, 300 };
 
 	FactoryOptions ops;
-	ops.nParticles(100);
+	ops.nParticles(3);
 	ops.massConstant(1.0f);
 	ops.positionUniformCentered(halfSizePoint, cv::Size{ 500, 500 });
-	//ops.positionUniform(cv::Point2f{ 0.0f, 0.0f } + halfSizePoint, cv::Size{ 600, 600 });
 	ops.velocityConstant(0.0f, 0.0f);
 	
 	Factory factory;
@@ -29,13 +28,13 @@ int main() {
 	Display display;
 	display.screenSize(size);
 
-	cv::VideoWriter videoWriter;
-	videoWriter = cv::VideoWriter(
-		"part_sim_100.avi",
-		cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-		60,
-		size
-	);
+	//cv::VideoWriter videoWriter;
+	//videoWriter = cv::VideoWriter(
+	//	"part_sim_100.avi",
+	//	cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
+	//	60,
+	//	size
+	//);
 
 	ForceEngine forceEngine;
 	
@@ -55,14 +54,14 @@ int main() {
 		cv::Mat frame = display.getFrame();
 		display.show(1);
 		
-		videoWriter.write(frame);
+		//videoWriter.write(frame);
 
 		forceEngine.update();
 	}
 
 	sw.stop();
 
-	videoWriter.release();
+	//videoWriter.release();
 
 	long long ms = duration_cast<chrono::milliseconds>(sw.elapsed()).count();
 	long long sec = duration_cast<chrono::seconds>(sw.elapsed()).count();

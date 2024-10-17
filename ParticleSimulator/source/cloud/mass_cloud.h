@@ -14,7 +14,4 @@ public:
 	virtual ~MassCloud() noexcept = default;
 	MassCloud & operator=(const MassCloud &) = default;
 	MassCloud & operator=(MassCloud &&) noexcept = default;
-
-	cv::Mat1f & mass() { return static_cast<super_t &>(*this); };
-	const cv::Mat1f & mass() const { return static_cast<const super_t &>(*this); };
 }; // class MassCloud

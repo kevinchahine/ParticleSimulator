@@ -14,7 +14,4 @@ public:
 	virtual ~PositionCloud() noexcept = default;
 	PositionCloud & operator=(const PositionCloud &) = default;
 	PositionCloud & operator=(PositionCloud &&) noexcept = default;
-
-	cv::Mat1f & position() { return static_cast<super_t &>(*this); };
-	const cv::Mat1f & position() const { return static_cast<const super_t &>(*this); };
 }; // class PositionCloud

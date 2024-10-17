@@ -14,7 +14,4 @@ public:
 	virtual ~VelocityCloud() noexcept = default;
 	VelocityCloud & operator=(const VelocityCloud &) = default;
 	VelocityCloud & operator=(VelocityCloud &&) noexcept = default;
-
-	cv::Mat1f & velocity() { return static_cast<super_t &>(*this); };
-	const cv::Mat1f & velocity() const { return static_cast<const super_t &>(*this); };
 }; // class VelocityCloud
