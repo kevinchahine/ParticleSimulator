@@ -10,6 +10,7 @@
 class FactoryOptions
 {
 	friend class Factory;
+
 public:
 	void nParticles(size_t count) { _nParticles = count; }
 	size_t nParticles() const { return _nParticles; }
@@ -27,13 +28,14 @@ public:
 	void velocityNormal(float meanX, float stddevX, float meanY, float stddevY);
 	void velocityUniform(float minX, float maxX, float minY, float maxY);
 
+	void typeDiscrete(const std::initializer_list<ParticleType> & types);
+
 private:
 	size_t _nParticles = 1000;
-	std::unique_ptr<Distribution> _massDist = std::make_unique<ConstantDistribution>(0.0f);
-	std::unique_ptr<Distribution> _xPosDist = std::make_unique<ConstantDistribution>(0.0f);
-	std::unique_ptr<Distribution> _yPosDist = std::make_unique<ConstantDistribution>(0.0f);
-	std::unique_ptr<Distribution> _xVelDist = std::make_unique<ConstantDistribution>(0.0f);
-	std::unique_ptr<Distribution> _yVelDist = std::make_unique<ConstantDistribution>(0.0f);
-	std::unique_ptr<Distribution> _typeDist = std::make_unique<ConstantDistribution>(0.0f);
-	std::vector<ParticleType> _types{ ParticleType::MASS };
+	std::unique_ptr<ContinuousDistribution> _massDist = std::make_unique<ConstantDistribution>(0.0f);
+	std::unique_ptr<ContinuousDistribution> _xPosDist = std::make_unique<ConstantDistribution>(0.0f);
+	std::unique_ptr<ContinuousDistribution> _yPosDist = std::make_unique<ConstantDistribution>(0.0f);
+	std::unique_ptr<ContinuousDistribution> _xVelDist = std::make_unique<ConstantDistribution>(0.0f);
+	std::unique_ptr<ContinuousDistribution> _yVelDist = std::make_unique<ConstantDistribution>(0.0f);
+	std::unique_ptr<ParticleTypeDistribution> _typeDist = std::make_unique<ParticleTypeDistribution>();
 }; // class FactoryOptions

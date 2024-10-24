@@ -6,11 +6,11 @@
 
 using namespace std;
 
-void ForceEngine::initializeCloud(const Cloud & cloud) {
+void ForceEngine::initialize(const Cloud & cloud) {
 	_cloud = cloud.clone();
 }
 
-void ForceEngine::initializeCloud(Cloud && cloud) {
+void ForceEngine::initialize(Cloud && cloud) {
 	_cloud = std::move(cloud);
 }
 

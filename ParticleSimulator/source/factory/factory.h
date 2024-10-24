@@ -17,6 +17,8 @@ public:
 	Cloud generateCloud(const FactoryOptions & ops);
 
 private:
+	void generateCharge(const FactoryOptions & ops, Cloud & cloud);
+
 	Particle makeParticle(const ParticleType & pType);
 
 }; // class Factory

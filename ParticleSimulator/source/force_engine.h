@@ -11,10 +11,10 @@ public:
 	/// @details	All operations will be applied to the saved particle cloud.
 	/// 
 	/// @param		cloud A Particle Cloud
-	void initializeCloud(const Cloud & cloud);
+	void initialize(const Cloud & cloud);
 
-	/// @see		ForceEngine::initializeCloud
-	void initializeCloud(Cloud && cloud);
+	/// @see		ForceEngine::initialize
+	void initialize(Cloud && cloud);
 
 	void setFrameDuration(float duration) { _frameDuration = duration; }
 

@@ -58,6 +58,7 @@ void FactoryOptions::velocityUniform(
 	this->_yVelDist = make_unique<UniformDistribution>(minY, maxY);
 }
 
+
 void FactoryOptions::velocityConstant(float velocityX, float velocityY) {
 	this->_xVelDist = make_unique<ConstantDistribution>(velocityX);
 	this->_yVelDist = make_unique<ConstantDistribution>(velocityY);
@@ -71,4 +72,10 @@ void FactoryOptions::velocityNormal(
 ) {
 	this->_xVelDist = make_unique<NormalDistribution>(meanX, stddevX);
 	this->_yVelDist = make_unique<NormalDistribution>(meanY, stddevY);
+}
+
+void FactoryOptions::typeDiscrete(
+	const std::initializer_list<ParticleType> & types
+) {
+	this->_typeDist = std::make_unique<ParticleTypeDistribution>(types);
 }
