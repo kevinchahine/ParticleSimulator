@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cloud/cloud.hpp"
+#include "constants.h"
 
 class ForceEngine
 {
@@ -30,6 +31,13 @@ private:
 	///				to each particle in the cloud.
 	ForceCloud calcGravitationalForce(Cloud & cloud);
 
+	/// @brief		Calculates the force between charged particles applied to each
+	///				particle in the cloud.
+	/// @param		cloud A Cloud which contains mass, position and charge
+	/// @return		A ForceCloud storing the total Coulomb force applied 
+	///				to each particle in the cloud.
+	ForceCloud calcCoulombForce(Cloud & cloud);
+
 	/// @brief		Calculates the Spring-Mass-Damper force applied to each
 	///				particle in the cloud.
 	/// @param		cloud A Cloud which contains mass and element type
@@ -57,6 +65,9 @@ private:
 private:
 	// Duration of each frame in seconds
 	float _frameDuration = 1 / 60.0f;// duration of 60Hz
+
+	// Duration of each frame in seconds in the simulated time.
+	float _virtualFrameDuration = 1.0f / Constants::gravitational;
 
 	// TODO: add a queue of Clouds (circular buffer) to support
 	//		trapezoidal approximations and Simpsons rule

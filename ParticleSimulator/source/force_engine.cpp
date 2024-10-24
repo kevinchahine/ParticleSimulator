@@ -1,7 +1,6 @@
 #pragma once
 
 #include "force_engine.h"
-#include "constants.h"
 #include "stop_watch.h"
 
 using namespace std;
@@ -15,7 +14,11 @@ void ForceEngine::initialize(Cloud && cloud) {
 }
 
 void ForceEngine::update() {
-	ForceCloud force = this->calcGravitationalForce(_cloud);
+	ForceCloud gravitationalForce = this->calcGravitationalForce(_cloud);
+	//ForceCloud coulombsForce = this->calcCoulombForce(_cloud);
+
+	ForceCloud force = gravitationalForce;
+	//cv::add(gravitationalForce, coulombsForce, force);
 
 	AccelerationCloud accel = this->calcAcceleration(force, _cloud.mass());
 
@@ -95,10 +98,11 @@ ForceCloud ForceEngine::calcGravitationalForce(Cloud & cloud) {
 	cv::Mat1f forceMagnitude;
 	cv::divide(numerator, distMagnitude, forceMagnitude);
 
+	// Make matrix with 0s on main diagonal, 1s everywhere else.
 	cv::Mat1f eye = cv::Mat1f::eye(N_PARTICLES, N_PARTICLES);
 	cv::threshold(eye, eye, 0.5, 1.0, cv::ThresholdTypes::THRESH_BINARY_INV);
 
-	cv::multiply(forceMagnitude, eye, forceMagnitude);
+	cv::multiply(forceMagnitude, eye, forceMagnitude);// Set diagonals to zero
 	cv::patchNaNs(forceMagnitude, 0.0);
 
 	// Force Direction
@@ -114,6 +118,111 @@ ForceCloud ForceEngine::calcGravitationalForce(Cloud & cloud) {
 	cv::multiply(forceMagnitude, unitX, forceX);
 	cv::multiply(forceMagnitude, unitY, forceY);
 	
+	cv::patchNaNs(forceX, 0.0);
+	cv::patchNaNs(forceY, 0.0);
+
+	// Total Force
+	cv::reduce(forceX, forceX, 1, cv::ReduceTypes::REDUCE_SUM);
+	cv::reduce(forceY, forceY, 1, cv::ReduceTypes::REDUCE_SUM);
+
+	// Combine into one Matrix
+	ForceCloud force(N_PARTICLES);
+
+	forceX.copyTo(force(cv::Rect(0, 0, 1, N_PARTICLES)));
+	forceY.copyTo(force(cv::Rect(1, 0, 1, N_PARTICLES)));
+
+	return force;
+}
+
+ForceCloud ForceEngine::calcCoulombForce(Cloud & cloud) {
+	const int N_PARTICLES = cloud.nParticles();
+
+	// Magnitude of Coulomb's Force:
+	// |F| = k * q1 * q2 / d^2
+	//	d = |p1 - p2|
+	//	k = Coulomb's constant
+	//	q1 = Charge of particle 1
+	//	q2 = Charge of particle 2
+	//	p1 = deltaPosition of particle 1
+	//	p2 = deltaPosition of particle 2
+	//	
+	//	Force Vector of Coulomb's Force:
+	//		F = |F| * (p2 - p1)
+
+	// --- Numerator ---
+	// numerator = k * q1 * q2
+	cv::Mat1f chargeRight = cv::repeat(cloud.charge(), 1, N_PARTICLES);
+
+	cv::Mat1f chargeDown;
+	cv::rotate(cloud.charge(), chargeDown, cv::ROTATE_90_COUNTERCLOCKWISE);
+	chargeDown = cv::repeat(chargeDown, N_PARTICLES, 1);
+
+	cv::Mat1f numerator;
+	cv::multiply(chargeRight, chargeDown, numerator);
+	numerator *= Constants::coulombs;
+
+	// --- Denominator ---
+	cv::Mat1f xPos = cloud.position().sliceX();
+	cv::Mat1f yPos = cloud.position().sliceY();
+
+	cv::Mat1f xPosRight = cv::repeat(xPos, 1, N_PARTICLES);
+	cv::Mat1f xPosDown;
+	cv::rotate(xPos, xPosDown, cv::ROTATE_90_COUNTERCLOCKWISE);
+	xPosDown = cv::repeat(xPosDown, N_PARTICLES, 1);
+
+	cv::Mat1f yPosRight = cv::repeat(yPos, 1, N_PARTICLES);
+	cv::Mat1f yPosDown;
+	cv::rotate(yPos, yPosDown, cv::ROTATE_90_COUNTERCLOCKWISE);
+	yPosDown = cv::repeat(yPosDown, N_PARTICLES, 1);
+
+	// TODO: maybe its backwards
+	cv::Mat1f xDiff;
+	cv::Mat1f yDiff;
+
+	cv::subtract(xPosRight, xPosDown, xDiff);
+	cv::subtract(yPosRight, yPosDown, yDiff);
+
+	// --- Square the Differences ---
+	cv::Mat1f xDiffSquared;
+	cv::Mat1f yDiffSquared;
+
+	cv::multiply(xDiff, xDiff, xDiffSquared);
+	cv::multiply(yDiff, yDiff, yDiffSquared);
+
+	// d^2
+	cv::Mat1f distMagnitudeSquared;
+	cv::add(xDiffSquared, yDiffSquared, distMagnitudeSquared);
+
+	cv::Mat1f distMagnitude;
+	cv::sqrt(distMagnitudeSquared, distMagnitude);
+
+	// TODO: try to replace above code with this call. Try.
+	//cv::Mat1f distMagnitude = cloud.position().calcDistance();
+
+	// Force Magnitude
+	cv::Mat1f forceMagnitude;
+	cv::divide(numerator, distMagnitude, forceMagnitude);
+
+	// Remove elements subject to division by 0
+	cv::Mat1f eye = cv::Mat1f::eye(N_PARTICLES, N_PARTICLES);
+	cv::threshold(eye, eye, 0.5, 1.0, cv::ThresholdTypes::THRESH_BINARY_INV);
+
+	cv::multiply(forceMagnitude, eye, forceMagnitude);
+	cv::patchNaNs(forceMagnitude, 0.0);
+
+	// Force Direction
+	cv::Mat1f unitX;
+	cv::Mat1f unitY;
+
+	cv::divide(xDiff, distMagnitude, unitX);
+	cv::divide(yDiff, distMagnitude, unitY);
+
+	cv::Mat1f forceX;
+	cv::Mat1f forceY;
+
+	cv::multiply(forceMagnitude, unitX, forceX);
+	cv::multiply(forceMagnitude, unitY, forceY);
+
 	cv::patchNaNs(forceX, 0.0);
 	cv::patchNaNs(forceY, 0.0);
 
@@ -158,7 +267,7 @@ AccelerationCloud ForceEngine::calcAcceleration(
 VelocityCloud ForceEngine::calcVelocityChange(const AccelerationCloud & accel) {
 	VelocityCloud velocity;
 	
-	velocity.mat() = accel * _frameDuration;
+	velocity.mat() = accel * _frameDuration * _virtualFrameDuration;
 
 	// TODO: Trapezoidal Approximation
 	// TODO: Simpsons Rule
@@ -175,7 +284,7 @@ PositionCloud ForceEngine::calcPositionChange(const VelocityCloud & velocity) {
 
 	// TODO: Trapezoidal Approximation
 	// TODO: Simpsons Rule
-	deltaPosition.mat() = velocity.mat() * _frameDuration;
+	deltaPosition.mat() = velocity.mat() * _frameDuration * _virtualFrameDuration;
 
 	return deltaPosition;
 }

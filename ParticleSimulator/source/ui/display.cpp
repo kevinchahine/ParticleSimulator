@@ -2,6 +2,7 @@
 
 using namespace std;
 
+const cv::Scalar WHITE{ 255, 255, 255 };
 const cv::Scalar BLACK{ 0, 0, 0 };
 const cv::Scalar GRAY{ 64, 64, 64 };
 const cv::Scalar LIGHT_GRAY{ 32, 32, 32 };
@@ -9,6 +10,8 @@ const cv::Scalar BLUE{ 255, 0, 0 };
 const cv::Scalar GREEN{ 0, 255, 0 };
 
 void Display::render(const Cloud & cloud) {
+	_frameCount++;
+
 	currentCloud = &cloud;
 
 	cv::Mat particlePanel = cv::Mat::zeros(_particleSpaceSize, CV_8UC3);
@@ -19,6 +22,7 @@ void Display::render(const Cloud & cloud) {
 	//renderCentroid(particlePanel);
 	renderTrails(particlePanel);
 	renderTextOverlay(particlePanel);
+	renderFrameCounter(particlePanel);
 
 	overlayParticlePanel(particlePanel);
 }
@@ -85,6 +89,22 @@ void Display::renderParticles(cv::Mat & img, const Cloud & cloud) {
 void Display::renderTrails(cv::Mat & img) {}
 
 void Display::renderTextOverlay(cv::Mat & img) {}
+
+void Display::renderFrameCounter(cv::Mat & img) {
+	stringstream ss;
+	ss << "Frame count: " << _frameCount;
+
+	cv::Size sz = img.size();
+	cv::Point textPos{ 4, sz.height - 20 };
+	cv::putText(
+		img, 
+		ss.str(),
+		textPos, 
+		cv::HersheyFonts::FONT_HERSHEY_PLAIN, 
+		1.0, 
+		WHITE
+	);
+}
 
 void Display::overlayParticlePanel(cv::Mat & particlePanel) {
 	if (_frame.size() != particlePanel.size()) {

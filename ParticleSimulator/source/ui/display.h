@@ -38,6 +38,7 @@ private:
 	void renderParticles(cv::Mat & img, const Cloud & cloud);
 	void renderTrails(cv::Mat & img);
 	void renderTextOverlay(cv::Mat & img);
+	void renderFrameCounter(cv::Mat & img);
 	void overlayParticlePanel(cv::Mat & particlePanel);
 
 private:
@@ -47,4 +48,5 @@ private:
 	cv::Point2f _particleSpaceCenter;
 	int _markerSpacing = 100;
 	const Cloud * currentCloud = nullptr;
+	size_t _frameCount = 0;
 }; // class Display

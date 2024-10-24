@@ -4,7 +4,7 @@ using namespace std;
 
 namespace Constants
 {
-	const float gravitational = -5000;
+	const float gravitational = 6.67430e-11;
 	const float coulombs = 8'987'551'792.3;
 	const float a = -0.77;
 	const float b = -3.7;
