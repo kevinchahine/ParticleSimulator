@@ -21,12 +21,20 @@ void ForceEngine::update() {
 	//cv::add(gravitationalForce, coulombsForce, force);
 
 	AccelerationCloud accel = this->calcAcceleration(force, _cloud.mass());
+	cout << accel << endl;
+	this->updateAcceleration(accel);
+	this->updateVelocity();
+	this->updatePosition();
 
-	VelocityCloud deltaVelocity = this->calcVelocityChange(accel);
-	this->applyVelocity(deltaVelocity);
-
-	PositionCloud deltaPosition = this->calcPositionChange(_cloud.velocity());
-	this->applyPosition(deltaPosition);
+	// ------------
+	//AccelerationCloud accel = this->calcAcceleration(force, _cloud.mass());
+	//this->applyAcceleration(accel);
+	//
+	//VelocityCloud deltaVelocity = this->calcVelocityChange(accel);
+	//this->applyVelocity(deltaVelocity);
+	//
+	//PositionCloud deltaPosition = this->calcPositionChange(_cloud.velocity());
+	//this->applyPosition(deltaPosition);
 }
 
 float ForceEngine::frameRate() const {
@@ -288,12 +296,71 @@ AccelerationCloud ForceEngine::calcAcceleration(
 	return accel;
 }
 
+void ForceEngine::updateAcceleration(AccelerationCloud & accel) {
+	_accelerations.push_front(accel);
+}
+
+void ForceEngine::updateVelocity() {
+	// --- Approximate Change in Velocity ---
+	// --- for this iteration ---
+	AccelerationCloud & latestAccel = _accelerations.front();
+
+	// Get the latest velocity
+	// (Store in a separate object in order to increase reference count of cv::Mat)
+	const VelocityCloud & currVelocity = _cloud.velocity();
+
+	VelocityCloud deltaVelocity;
+
+	// Approximate integral of acceleration to get velocity
+	// Use Rectangular Approximation Methods (RAM)
+	float multiplier = _frameDuration * _timeScalar;
+	deltaVelocity.mat() = latestAccel * multiplier;
+
+	// Use Trapezoidal Approximation
+	// TODO: Trapezoidal Approximation
+	// TODO: Simpsons Rule
+
+	VelocityCloud nextVelocity;
+
+	cv::add(deltaVelocity.mat(), currVelocity.mat(), nextVelocity);
+
+	// Current Velocity becomes the previous one
+	_velocities.push_front(currVelocity);
+
+	// Next Velocity become the current one
+	_cloud.velocity() = nextVelocity;
+}
+
+void ForceEngine::updatePosition() {
+	// --- Approximate Change in Position ---
+	// --- for this iteration ---
+	VelocityCloud & latestVelocity = _velocities.front();
+
+	PositionCloud deltaPosition; 
+
+	// Approximate integral of velocity to get position
+	// Use Rectangular Approximation Methods (RAM)
+	float multiplier = _frameDuration * _timeScalar;
+	deltaPosition.mat() = latestVelocity * multiplier;
+
+	// Use Trapezoidal Approximation
+	// TODO: Trapezoidal Approximation
+	// TODO: Simpsons Rule
+
+	// TODO: can we remove `.mat()`
+	cv::add(_cloud.position(), deltaPosition.mat(), _cloud.position());
+}
+
 VelocityCloud ForceEngine::calcVelocityChange(const AccelerationCloud & accel) {
 	VelocityCloud velocity;
 	
+	// Approximate integraal of acceleration to get velocity
+	// Use Rectangular Approximation Methods (RAM)
 	float multiplier = _frameDuration * _timeScalar;
 	
 	velocity.mat() = accel * multiplier;
+
+	// Use Trapezoidal Approximation
 
 	// TODO: Trapezoidal Approximation
 	// TODO: Simpsons Rule
@@ -302,7 +369,16 @@ VelocityCloud ForceEngine::calcVelocityChange(const AccelerationCloud & accel) {
 }
 
 void ForceEngine::applyVelocity(const VelocityCloud & deltaVelocity) {
-	cv::add(_cloud.velocity(), deltaVelocity.mat(), _cloud.velocity());
+	// Get the latest velocity
+	// (Store in a separate object in order to increase reference count of cv::Mat)
+	VelocityCloud currVeloicty = _velocities.front();
+
+	// Push a place holder for the next velocity
+	// This should be a reference to modify the object in the queue
+	_velocities.push_front();
+	VelocityCloud & nextVelocity = _velocities.front();
+
+	cv::add(nextVelocity, deltaVelocity.mat(), currVeloicty);
 }
 
 PositionCloud ForceEngine::calcPositionChange(const VelocityCloud & velocity) {
@@ -311,6 +387,7 @@ PositionCloud ForceEngine::calcPositionChange(const VelocityCloud & velocity) {
 	// TODO: Trapezoidal Approximation
 	// TODO: Simpsons Rule
 	float multiplier = _frameDuration * _timeScalar;
+
 	deltaPosition.mat() = velocity.mat() * multiplier;
 
 	return deltaPosition;

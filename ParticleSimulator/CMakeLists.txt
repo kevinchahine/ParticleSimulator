@@ -41,6 +41,8 @@ set (SOURCE
 	"source/factory/factory_options.h"
 	"source/constants.cpp"
 	"source/constants.h"
+	"source/cloud_queue.cpp"
+	"source/cloud_queue.h"
 	"source/force_engine.cpp"
 	"source/force_engine.h"
 	"source/globals.cpp"

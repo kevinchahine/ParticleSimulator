@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cloud/cloud.hpp"
+#include "cloud_queue.h"
 #include "constants.h"
 
 class ForceEngine
@@ -93,6 +93,12 @@ private:
 		const ForceCloud & force,
 		MassCloud & mass) const;
 
+	void updateAcceleration(AccelerationCloud & accel);
+
+	void updateVelocity();
+
+	void updatePosition();
+
 	VelocityCloud calcVelocityChange(const AccelerationCloud & accel);
 
 	void applyVelocity(const VelocityCloud & deltaVelocity);
@@ -106,9 +112,15 @@ private:
 	float _frameDuration = 1.0f / 60.0f;// duration of 60Hz
 
 	// Duration of each frame in seconds in the simulated time.
-	float _timeScalar = 10'000'000.0f;
+	float _timeScalar = 1.0f;
+
+	Cloud _cloud;
 
 	// TODO: add a queue of Clouds (circular buffer) to support
 	//		trapezoidal approximations and Simpsons rule
-	Cloud _cloud;
+	boost::circular_buffer<AccelerationCloud> _accelerations = 
+		boost::circular_buffer<AccelerationCloud>(2);
+
+	boost::circular_buffer<VelocityCloud> _velocities = 
+		boost::circular_buffer<VelocityCloud>(1);
 }; // class ForceEngine

@@ -39,8 +39,8 @@ int main() {
 	ForceEngine forceEngine;
 	
 	forceEngine.initialize(cloud);
-	forceEngine.frameRate(120.0f);
-	forceEngine.timeScalar(50'000'000.0f);
+	forceEngine.frameRate(60.0f);
+	forceEngine.timeScalar(25'000'000.0f);
 
 	Display display;
 	display.screenSize(size);
