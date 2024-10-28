@@ -29,6 +29,30 @@ void ForceEngine::update() {
 	this->applyPosition(deltaPosition);
 }
 
+float ForceEngine::frameRate() const {
+	return 1.0f / _frameDuration;
+}
+
+void ForceEngine::frameRate(float rate) {
+	_frameDuration = 1.0f / rate;
+}
+
+float ForceEngine::frameDuration() const {
+	return _frameDuration;
+}
+
+void ForceEngine::frameDuration(float frameDuration) {
+	_frameDuration = frameDuration;
+}
+
+float ForceEngine::timeScalar() const {
+	return _timeScalar;
+}
+
+void ForceEngine::timeScalar(float timeScalar) {
+	_timeScalar = timeScalar;
+}
+
 ForceCloud ForceEngine::calcGravitationalForce(Cloud & cloud) {
 	const int N_PARTICLES = cloud.nParticles();
 
@@ -54,7 +78,7 @@ ForceCloud ForceEngine::calcGravitationalForce(Cloud & cloud) {
 
 	cv::Mat1f numerator;
 	cv::multiply(massRight, massDown, numerator);
-	numerator *= Constants::gravitational;
+	numerator *= -Constants::gravitational;
 	
 	// --- Denominator ---
 	cv::Mat1f xPos = cloud.position().sliceX();// (cv::Range(0, N_PARTICLES), cv::Range(0, 1));
@@ -267,7 +291,9 @@ AccelerationCloud ForceEngine::calcAcceleration(
 VelocityCloud ForceEngine::calcVelocityChange(const AccelerationCloud & accel) {
 	VelocityCloud velocity;
 	
-	velocity.mat() = accel * _frameDuration * _virtualFrameDuration;
+	float multiplier = _frameDuration * _timeScalar;
+	
+	velocity.mat() = accel * multiplier;
 
 	// TODO: Trapezoidal Approximation
 	// TODO: Simpsons Rule
@@ -284,7 +310,8 @@ PositionCloud ForceEngine::calcPositionChange(const VelocityCloud & velocity) {
 
 	// TODO: Trapezoidal Approximation
 	// TODO: Simpsons Rule
-	deltaPosition.mat() = velocity.mat() * _frameDuration * _virtualFrameDuration;
+	float multiplier = _frameDuration * _timeScalar;
+	deltaPosition.mat() = velocity.mat() * multiplier;
 
 	return deltaPosition;
 }

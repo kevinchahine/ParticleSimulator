@@ -28,12 +28,20 @@ void Display::render(const Cloud & cloud) {
 }
 
 void Display::show() {
-	show(1);
+	show(_frameDurationMS);
 }
 
 void Display::show(int delayMS) {
 	cv::imshow("Particle Simulator", _frame);
 	cv::waitKey(delayMS);
+}
+
+void Display::frameRate(int rate) {
+	_frameDurationMS = 1000 / rate;
+}
+
+int Display::frameRate() const {
+	return 1000 / _frameDurationMS;
 }
 
 void Display::setCenter(const Cloud & cloud) {

@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <thread>
+#include <chrono>
 
 #include <opencv2/opencv.hpp>
 
@@ -17,7 +19,7 @@ int main() {
 	cv::Point2f halfSizePoint{ 500, 300 };
 
 	FactoryOptions ops;
-	ops.nParticles(5);
+	ops.nParticles(3);
 	ops.massConstant(1.0f);
 	ops.positionUniformCentered(halfSizePoint, cv::Size{ 500, 500 });
 	ops.velocityConstant(0.0f, 0.0f);
@@ -26,9 +28,6 @@ int main() {
 	Factory factory;
 	Cloud cloud = factory.generateCloud(ops);
 	
-	Display display;
-	display.screenSize(size);
-
 	//cv::VideoWriter videoWriter;
 	//videoWriter = cv::VideoWriter(
 	//	"part_sim_100.avi",
@@ -40,20 +39,27 @@ int main() {
 	ForceEngine forceEngine;
 	
 	forceEngine.initialize(cloud);
-	forceEngine.setFrameDuration(1.0f / 60.0f);
-	
+	forceEngine.frameRate(120.0f);
+	forceEngine.timeScalar(50'000'000.0f);
+
+	Display display;
+	display.screenSize(size);
+	display.frameRate(forceEngine.frameRate());
+
 	tick::StopWatch sw;
 	sw.reset();
 	sw.start();
 
+	this_thread::sleep_for(chrono::seconds(1));
+
 	int counter = 0;
-	while (sw.elapsed() < chrono::seconds(10)) {
+	while (sw.elapsed() < chrono::seconds(15)) {
 		counter++;
 		const Cloud & cloudRef = forceEngine.cloud();
 		
 		display.render(cloudRef);
 		cv::Mat frame = display.getFrame();
-		display.show(1);
+		display.show();
 		
 		//videoWriter.write(frame);
 

@@ -29,6 +29,14 @@ public:
 		_particleSpaceSize = size;
 	}
 
+	/// @brief	Sets frame rate and delay of show function
+	/// @param	rate Frame rate in Hz
+	void frameRate(int rate);
+
+	/// @brief	Get frame rate
+	/// @return	rate Frame rate in Hz
+	int frameRate() const;
+
 private:
 	void setCenter(const Cloud & cloud);
 
@@ -49,4 +57,5 @@ private:
 	int _markerSpacing = 100;
 	const Cloud * currentCloud = nullptr;
 	size_t _frameCount = 0;
+	int _frameDurationMS = 1;
 }; // class Display
