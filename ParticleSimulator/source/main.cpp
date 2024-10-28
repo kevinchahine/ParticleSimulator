@@ -17,7 +17,7 @@ void run() {
 	cv::Point2f halfSizePoint{ 500, 300 };
 
 	FactoryOptions ops;
-	ops.nParticles(3);
+	ops.nParticles(5);
 	ops.massConstant(1.0f);
 	ops.positionUniformCentered(halfSizePoint, cv::Size{ 500, 500 });
 	ops.velocityConstant(0.0f, 0.0f);
@@ -38,7 +38,7 @@ void run() {
 	
 	forceEngine.initialize(cloud);
 	forceEngine.frameRate(120.0f);
-	forceEngine.timeScalar(25'000'000.0f);
+	forceEngine.timeScalar(10'000'000.0f);
 
 	Display display;
 	display.screenSize(size);

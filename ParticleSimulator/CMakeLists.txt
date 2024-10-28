@@ -59,6 +59,8 @@ set (SOURCE
 set (MATH
 	"source/math/integral.cpp"
 	"source/math/integral.h"
+	"source/math/operations.cpp"
+	"source/math/operations.h"
 )
 
 set (UI
@@ -75,6 +77,7 @@ add_executable (${APP_NAME}
 	${CONFIG}
 	${CLOUD}
 	${SOURCE}
+	${MATH}
 	${UI}
 	${NOTES}
 )

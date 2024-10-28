@@ -111,8 +111,8 @@ private:
 	// TODO: add a queue of Clouds (circular buffer) to support
 	//		trapezoidal approximations and Simpsons rule
 	boost::circular_buffer<AccelerationCloud> _accelerations = 
-		boost::circular_buffer<AccelerationCloud>(2);
+		boost::circular_buffer<AccelerationCloud>(3);
 
 	boost::circular_buffer<VelocityCloud> _velocities = 
-		boost::circular_buffer<VelocityCloud>(1);
+		boost::circular_buffer<VelocityCloud>(2);
 }; // class ForceEngine
