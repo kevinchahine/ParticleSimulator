@@ -2,11 +2,23 @@
 
 #include "force_engine.h"
 #include "stop_watch.h"
+#include "math/integral.h"
 
 using namespace std;
 
 void ForceEngine::initialize(const Cloud & cloud) {
 	_cloud = cloud.clone();
+	size_t nParticles = _cloud.nParticles();
+
+	size_t c = _accelerations.capacity();
+	for (size_t i = 0; i < c; i++) {
+		_accelerations.push_front(AccelerationCloud(nParticles));
+	}
+
+	c = _velocities.capacity();
+	for (size_t i = 0; i < c; i++) {
+		_velocities.push_front(VelocityCloud(nParticles));
+	}
 }
 
 void ForceEngine::initialize(Cloud && cloud) {
@@ -21,20 +33,9 @@ void ForceEngine::update() {
 	//cv::add(gravitationalForce, coulombsForce, force);
 
 	AccelerationCloud accel = this->calcAcceleration(force, _cloud.mass());
-	cout << accel << endl;
 	this->updateAcceleration(accel);
 	this->updateVelocity();
 	this->updatePosition();
-
-	// ------------
-	//AccelerationCloud accel = this->calcAcceleration(force, _cloud.mass());
-	//this->applyAcceleration(accel);
-	//
-	//VelocityCloud deltaVelocity = this->calcVelocityChange(accel);
-	//this->applyVelocity(deltaVelocity);
-	//
-	//PositionCloud deltaPosition = this->calcPositionChange(_cloud.velocity());
-	//this->applyPosition(deltaPosition);
 }
 
 float ForceEngine::frameRate() const {
@@ -314,7 +315,12 @@ void ForceEngine::updateVelocity() {
 	// Approximate integral of acceleration to get velocity
 	// Use Rectangular Approximation Methods (RAM)
 	float multiplier = _frameDuration * _timeScalar;
-	deltaVelocity.mat() = latestAccel * multiplier;
+	//deltaVelocity.mat() = integralRAM(latestAccel.mat(), multiplier);
+	deltaVelocity.mat() = integralTrapezoidal(
+		_accelerations.at(0).mat(),
+		_accelerations.at(1).mat(),
+		multiplier
+	);
 
 	// Use Trapezoidal Approximation
 	// TODO: Trapezoidal Approximation
@@ -336,63 +342,18 @@ void ForceEngine::updatePosition() {
 	// --- for this iteration ---
 	VelocityCloud & latestVelocity = _velocities.front();
 
-	PositionCloud deltaPosition; 
+	PositionCloud deltaPosition;
 
 	// Approximate integral of velocity to get position
 	// Use Rectangular Approximation Methods (RAM)
 	float multiplier = _frameDuration * _timeScalar;
-	deltaPosition.mat() = latestVelocity * multiplier;
-
-	// Use Trapezoidal Approximation
-	// TODO: Trapezoidal Approximation
-	// TODO: Simpsons Rule
+	//deltaPosition.mat() = integralRAM(latestVelocity.mat(), multiplier);
+	deltaPosition.mat() = integralTrapezoidal(
+		latestVelocity.mat(),
+		_velocities.at(0).mat(),
+		multiplier
+	);
 
 	// TODO: can we remove `.mat()`
-	cv::add(_cloud.position(), deltaPosition.mat(), _cloud.position());
-}
-
-VelocityCloud ForceEngine::calcVelocityChange(const AccelerationCloud & accel) {
-	VelocityCloud velocity;
-	
-	// Approximate integraal of acceleration to get velocity
-	// Use Rectangular Approximation Methods (RAM)
-	float multiplier = _frameDuration * _timeScalar;
-	
-	velocity.mat() = accel * multiplier;
-
-	// Use Trapezoidal Approximation
-
-	// TODO: Trapezoidal Approximation
-	// TODO: Simpsons Rule
-
-	return velocity;
-}
-
-void ForceEngine::applyVelocity(const VelocityCloud & deltaVelocity) {
-	// Get the latest velocity
-	// (Store in a separate object in order to increase reference count of cv::Mat)
-	VelocityCloud currVeloicty = _velocities.front();
-
-	// Push a place holder for the next velocity
-	// This should be a reference to modify the object in the queue
-	_velocities.push_front();
-	VelocityCloud & nextVelocity = _velocities.front();
-
-	cv::add(nextVelocity, deltaVelocity.mat(), currVeloicty);
-}
-
-PositionCloud ForceEngine::calcPositionChange(const VelocityCloud & velocity) {
-	PositionCloud deltaPosition;
-
-	// TODO: Trapezoidal Approximation
-	// TODO: Simpsons Rule
-	float multiplier = _frameDuration * _timeScalar;
-
-	deltaPosition.mat() = velocity.mat() * multiplier;
-
-	return deltaPosition;
-}
-
-void ForceEngine::applyPosition(const PositionCloud & deltaPosition) {
-	cv::add(_cloud.position(), deltaPosition.mat(), _cloud.position());
+	cv::add(_cloud.position(), deltaPosition, _cloud.position());
 }

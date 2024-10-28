@@ -56,6 +56,11 @@ set (SOURCE
 	"source/stop_watch.h"
 )
 
+set (MATH
+	"source/math/integral.cpp"
+	"source/math/integral.h"
+)
+
 set (UI
 	
 )

@@ -99,14 +99,6 @@ private:
 
 	void updatePosition();
 
-	VelocityCloud calcVelocityChange(const AccelerationCloud & accel);
-
-	void applyVelocity(const VelocityCloud & deltaVelocity);
-
-	PositionCloud calcPositionChange(const VelocityCloud & velocity);
-
-	void applyPosition(const PositionCloud & deltaPosition);
-
 private:
 	// Duration of each frame in seconds
 	float _frameDuration = 1.0f / 60.0f;// duration of 60Hz

@@ -3,8 +3,6 @@
 #include <thread>
 #include <chrono>
 
-#include <opencv2/opencv.hpp>
-
 #include "globals.h"
 #include "factory/factory.h"
 #include "ui/display.h"
@@ -13,7 +11,7 @@
 
 using namespace std;
 
-int main() {
+void run() {
 	cv::Size size{ 1000, 600 };
 	cv::Size halfSize = size / 2;
 	cv::Point2f halfSizePoint{ 500, 300 };
@@ -39,7 +37,7 @@ int main() {
 	ForceEngine forceEngine;
 	
 	forceEngine.initialize(cloud);
-	forceEngine.frameRate(60.0f);
+	forceEngine.frameRate(120.0f);
 	forceEngine.timeScalar(25'000'000.0f);
 
 	Display display;
@@ -50,10 +48,10 @@ int main() {
 	sw.reset();
 	sw.start();
 
-	this_thread::sleep_for(chrono::seconds(1));
+	this_thread::sleep_for(chrono::milliseconds(100));
 
 	int counter = 0;
-	while (sw.elapsed() < chrono::seconds(15)) {
+	while (sw.elapsed() < chrono::seconds(10)) {
 		counter++;
 		const Cloud & cloudRef = forceEngine.cloud();
 		
@@ -64,7 +62,6 @@ int main() {
 		//videoWriter.write(frame);
 
 		forceEngine.update();
-		//cv::waitKey(0);
 	}
 
 	sw.stop();
@@ -78,6 +75,12 @@ int main() {
 		<< ms
 		<< "ms which is " 
 		<< (float) counter / (float) sec << " frames per second" << endl;
+}
+
+int main() {
+	while (true) {
+		run();
+	}
 
 	cin.get();
 
