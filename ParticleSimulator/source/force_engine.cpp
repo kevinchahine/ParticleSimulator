@@ -94,7 +94,7 @@ ForceCloud ForceEngine::calcGravitationalForce(Cloud & cloud) {
 
 	cv::Mat1f numerator;
 	cv::multiply(massRight, massDown, numerator);
-	numerator *= -Constants::gravitational;
+	numerator *= -Constants::gravitational * _timeScalar;
 	
 	// --- Denominator ---
 	cv::Mat1f xPos = cloud.position().sliceX();
@@ -323,7 +323,7 @@ void ForceEngine::updateVelocity() {
 
 	// Approximate integral of acceleration to get velocity
 	// Use Rectangular Approximation Methods (RAM)
-	float multiplier = _frameDuration * _timeScalar;
+	float multiplier = _frameDuration;//**** * _timeScalar;
 	//deltaVelocity.mat() = integralRAM(latestAccel.mat(), multiplier);
 	//deltaVelocity.mat() = integralTrapezoidal(
 	//	_accelerations.at(0).mat(),
@@ -361,7 +361,7 @@ void ForceEngine::updatePosition() {
 
 	// Approximate integral of velocity to get position
 	// Use Rectangular Approximation Methods (RAM)
-	float multiplier = _frameDuration * _timeScalar;
+	float multiplier = _frameDuration; //***** * _timeScalar;
 	//deltaPosition.mat() = integralRAM(latestVelocity.mat(), multiplier);
 	//deltaPosition.mat() = integralTrapezoidal(
 	//	latestVelocity.mat(),
