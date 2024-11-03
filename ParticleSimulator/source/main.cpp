@@ -12,14 +12,16 @@
 using namespace std;
 
 void run() {
-	cv::Size size{ 1000, 600 };
+	cv::Size size
+	{ 500, 300 };
+	//{ 1000, 600 };
 	cv::Size halfSize = size / 2;
-	cv::Point2f halfSizePoint{ 500, 300 };
+	cv::Point2f halfSizePoint{ (float) halfSize.width, (float) halfSize.height };
 
 	FactoryOptions ops;
 	ops.nParticles(3);
 	ops.massConstant(1.0f);
-	ops.positionUniformCentered(halfSizePoint, cv::Size{ 500, 500 });
+	ops.positionUniformCentered(halfSizePoint, halfSize);
 	ops.velocityConstant(0.0f, 0.0f);
 	ops.typeDiscrete({ ParticleType::PROTON, ParticleType::NEUTRON, ParticleType::ELECTRON });
 	
@@ -38,7 +40,11 @@ void run() {
 	
 	forceEngine.initialize(cloud);
 	forceEngine.frameRate(120.0f);
-	forceEngine.timeScalar(6.67430e+13);
+	forceEngine.timeScalar(
+		1.0f
+		// 5.0e+6
+		//6.67430e+13
+	);
 
 	Display display;
 	display.screenSize(size);
@@ -49,9 +55,10 @@ void run() {
 	sw.start();
 
 	this_thread::sleep_for(chrono::milliseconds(100));
+	chrono::seconds epochTime(1000);
 
 	int counter = 0;
-	while (sw.elapsed() < chrono::seconds(10)) {
+	while (sw.elapsed() < epochTime) {
 		counter++;
 		const Cloud & cloudRef = forceEngine.cloud();
 		

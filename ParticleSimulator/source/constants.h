@@ -9,6 +9,7 @@ namespace Constants
 	extern const float a;
 	extern const float b;
 	extern const float c;
+	extern const float d;
 
 	namespace Mass
 	{

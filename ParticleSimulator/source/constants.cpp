@@ -9,10 +9,11 @@ namespace Constants
 	const float a = -0.77;
 	const float b = -3.7;
 	const float c = -3.9;
+	const float d = 5000.0f;
 
 	namespace Mass
 	{
-		extern const float DEFAULT = 1.0f;
+		const float DEFAULT = 1.0f;
 		const float PROTON = 1.0f;
 		const float ELECTRON = 5.45e-4;
 		const float NEUTRON = PROTON + ELECTRON;
