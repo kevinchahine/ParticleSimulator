@@ -5,6 +5,8 @@
 #include "math/integral.h"
 #include "math/operations.h"
 
+#include <algorithm>
+
 using namespace std;
 
 void ForceEngine::initialize(const Cloud & cloud) {
@@ -36,7 +38,13 @@ void ForceEngine::update() {
 	AccelerationCloud accel = this->calcAcceleration(force, _cloud.mass());
 	this->updateAcceleration(accel);
 	this->updateVelocity();
+
+	PositionCloud lastPos = _cloud.position().clone();
 	this->updatePosition();
+	const PositionCloud & currPos = _cloud.position();
+
+	cv::Mat diff;
+	cv::subtract(lastPos.mat(), currPos.mat(), diff);
 }
 
 float ForceEngine::frameRate() const {
@@ -63,11 +71,17 @@ void ForceEngine::timeScalar(float timeScalar) {
 	_timeScalar = timeScalar;
 }
 
+void ForceEngine::setIntegralApproximationMethod(
+	ForceEngine::IntegralApproximationMethod iam
+) {
+	_iam = iam;
+}
+
 ForceCloud ForceEngine::calcGravitationalForce(Cloud & cloud) {
 	const int N_PARTICLES = cloud.nParticles();
 
 	ForceCloud forceCloud(N_PARTICLES);
-	
+
 	//	Magnitude of Gravitational Force:
 	//	|F| = -G * m1 * m2 / d^2
 	//		d = |p1 - p2|
@@ -98,11 +112,15 @@ ForceCloud ForceEngine::calcGravitationalForce(Cloud & cloud) {
 			// Distance between particle 1 and particle 2
 			cv::Point2f diff = p2 - p1;
 			double dist = cv::norm(diff);// Euclidean Distance (Pythagorean Theorem)
+
+			// Set a deadzone around each particle where the force is constant.
+			// Mitigates overshooting effects.
+			dist = std::max(dist, 100.0);
+
 			double distSquared = dist * dist;
 
-			float forceMagnitude = 
-				//Constants::gravitational * m1 * m2 / distSquared;
-				Constants::d * m1 * m2 / distSquared;
+			float forceMagnitude =
+				Constants::gravitational * m1 * m2 / distSquared;
 
 			cv::Vec2f direction(diff);
 			cv::normalize(direction, direction);
@@ -111,7 +129,7 @@ ForceCloud ForceEngine::calcGravitationalForce(Cloud & cloud) {
 
 			totalForce += force;
 		}
-		
+
 		cv::Point2f tf(totalForce);
 		forceCloud.at(i1, tf);
 	}
@@ -364,18 +382,28 @@ void ForceEngine::updateVelocity() {
 	// Approximate integral of acceleration to get velocity
 	// Use Rectangular Approximation Methods (RAM)
 	float multiplier = _frameDuration * _timeScalar;
-	//deltaVelocity.mat() = integralRAM(latestAccel.mat(), multiplier);
-	//deltaVelocity.mat() = integralTrapezoidal(
-	//	_accelerations.at(0).mat(),
-	//	_accelerations.at(1).mat(),
-	//	multiplier
-	//);
-	deltaVelocity.mat() = integralSimpsons(
-		_accelerations.at(0).mat(),
-		_accelerations.at(1).mat(),
-		_accelerations.at(2).mat(),
-		multiplier
-	);
+	switch (_iam) {
+	case ForceEngine::RAM:
+		deltaVelocity.mat() = integralRAM(latestAccel.mat(), multiplier);
+		break;
+	case ForceEngine::TRAPAZOIDAL:
+		deltaVelocity.mat() = integralTrapezoidal(
+			_accelerations.at(0).mat(),
+			_accelerations.at(1).mat(),
+			multiplier
+		);
+		break;
+	case ForceEngine::SIMPSONS:
+		deltaVelocity.mat() = integralSimpsons(
+			_accelerations.at(0).mat(),
+			_accelerations.at(1).mat(),
+			_accelerations.at(2).mat(),
+			multiplier
+		);
+		break;
+	default:
+		break;
+	}
 
 	VelocityCloud nextVelocity;
 
@@ -398,18 +426,29 @@ void ForceEngine::updatePosition() {
 	// Approximate integral of velocity to get position
 	// Use Rectangular Approximation Methods (RAM)
 	float multiplier = _frameDuration * _timeScalar;
-	//deltaPosition.mat() = integralRAM(latestVelocity.mat(), multiplier);
-	//deltaPosition.mat() = integralTrapezoidal(
-	//	latestVelocity.mat(),
-	//	_velocities.at(0).mat(),
-	//	multiplier
-	//);
-	deltaPosition.mat() = integralSimpsons(
-		latestVelocity.mat(),
-		_velocities.at(0).mat(),
-		_velocities.at(1).mat(),
-		multiplier
-	);
+	switch (_iam) {
+	case ForceEngine::RAM:
+		deltaPosition.mat() = integralRAM(latestVelocity.mat(), multiplier);
+		break;
+	case ForceEngine::TRAPAZOIDAL:
+		deltaPosition.mat() = integralTrapezoidal(
+			latestVelocity.mat(),
+			_velocities.at(0).mat(),
+			multiplier
+		);
+		break;
+	case ForceEngine::SIMPSONS:
+		deltaPosition.mat() = integralSimpsons(
+			latestVelocity.mat(),
+			_velocities.at(0).mat(),
+			_velocities.at(1).mat(),
+			multiplier
+		);
+		break;
+	default:
+		cout << "Error: " << __FILE__ << " line " << __LINE__ << endl;
+		break;
+	}
 
 	cv::add(_cloud.position(), deltaPosition, _cloud.position());
 }

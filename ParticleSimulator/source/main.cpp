@@ -13,8 +13,8 @@ using namespace std;
 
 void run() {
 	cv::Size size
-	{ 500, 300 };
-	//{ 1000, 600 };
+	//{ 500, 300 };
+	{ 1000, 600 };
 	cv::Size halfSize = size / 2;
 	cv::Point2f halfSizePoint{ (float) halfSize.width, (float) halfSize.height };
 
@@ -22,6 +22,7 @@ void run() {
 	ops.nParticles(3);
 	ops.massConstant(1.0f);
 	ops.positionUniformCentered(halfSizePoint, halfSize);
+	//ops.velocityUniform(-8.0f, 8.0f, -8.0f, 8.0f);
 	ops.velocityConstant(0.0f, 0.0f);
 	ops.typeDiscrete({ ParticleType::PROTON, ParticleType::NEUTRON, ParticleType::ELECTRON });
 	
@@ -41,9 +42,13 @@ void run() {
 	forceEngine.initialize(cloud);
 	forceEngine.frameRate(120.0f);
 	forceEngine.timeScalar(
-		1.0f
-		// 5.0e+6
+		//1.0f
+		//1000.0f
+		2.0e+8
 		//6.67430e+13
+	);
+	forceEngine.setIntegralApproximationMethod(
+		ForceEngine::IntegralApproximationMethod::SIMPSONS
 	);
 
 	Display display;
@@ -54,8 +59,8 @@ void run() {
 	sw.reset();
 	sw.start();
 
-	this_thread::sleep_for(chrono::milliseconds(100));
-	chrono::seconds epochTime(1000);
+	this_thread::sleep_for(chrono::milliseconds(50));
+	chrono::seconds epochTime(10);
 
 	int counter = 0;
 	while (sw.elapsed() < epochTime) {
@@ -63,7 +68,7 @@ void run() {
 		const Cloud & cloudRef = forceEngine.cloud();
 		
 		display.render(cloudRef);
-		cv::Mat frame = display.getFrame();
+		//cv::Mat frame = display.getFrame();
 		display.show();
 		
 		//videoWriter.write(frame);

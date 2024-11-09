@@ -41,7 +41,7 @@ Cloud Factory::generateCloud(const FactoryOptions & ops) {
 		cloud.velocity().at<float>(n, 1) = p.velocity().y;
 	}
 
-	generateCharge(ops, cloud);
+	//generateCharge(ops, cloud);
 
 	return cloud;
 }
@@ -50,38 +50,41 @@ void Factory::generateCharge(
 	const FactoryOptions & ops, 
 	Cloud & cloud
 ) {
-	for (size_t n = 0; n < ops.nParticles(); n++) {
-		ParticleType pt = ops._typeDist->generate(globals::dre);
-
-		float charge;
-		float mass;
-
-		if (pt == ParticleType::MASS) {
-			// No charge 
-			charge = 0.0f;
-			mass = Constants::Mass::DEFAULT;
-		}
-		else if (pt == ParticleType::PROTON) {
-			charge = Constants::Mass::PROTON;
-			mass = Constants::Mass::PROTON;
-		}
-		else if (pt == ParticleType::ELECTRON) {
-			charge = Constants::Mass::ELECTRON;
-			mass = Constants::Mass::ELECTRON;
-		}
-		else if (pt == ParticleType::NEUTRON) {
-			charge = Constants::Mass::NEUTRON;
-			mass = Constants::Mass::NEUTRON;
-		}
-		else {
-			stringstream ss;
-			ss << "Unknown ParticleType: " << pt;
-			throw std::runtime_error(ss.str().c_str());
-		}
-
-		cloud.charge().at<float>(n, 0) = charge;
-		cloud.mass().at<float>(n, 0) = mass;
-	}
+	// TODO: Fix this its very buggy
+	// TODO: find a way to control mass without messing it up
+	
+//	for (size_t n = 0; n < ops.nParticles(); n++) {
+//		ParticleType pt = ops._typeDist->generate(globals::dre);
+//
+//		float charge;
+//		float mass;
+//
+//		if (pt == ParticleType::MASS) {
+//			// No charge 
+//			charge = 0.0f;
+//			mass = Constants::Mass::DEFAULT;
+//		}
+//		else if (pt == ParticleType::PROTON) {
+//			charge = Constants::Mass::PROTON;
+//			mass = Constants::Mass::PROTON;
+//		}
+//		else if (pt == ParticleType::ELECTRON) {
+//			charge = Constants::Mass::ELECTRON;
+//			mass = Constants::Mass::ELECTRON;
+//		}
+//		else if (pt == ParticleType::NEUTRON) {
+//			charge = Constants::Mass::NEUTRON;
+//			mass = Constants::Mass::NEUTRON;
+//		}
+//		else {
+//			stringstream ss;
+//			ss << "Unknown ParticleType: " << pt;
+//			throw std::runtime_error(ss.str().c_str());
+//		}
+//
+//		cloud.charge().at<float>(n, 0) = charge;
+//		cloud.mass().at<float>(n, 0) = mass;
+//	}
 }
 
 Particle Factory::makeParticle(const ParticleType & pType) {

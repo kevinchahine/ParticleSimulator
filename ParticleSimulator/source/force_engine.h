@@ -6,6 +6,14 @@
 class ForceEngine
 {
 public:
+	enum IntegralApproximationMethod
+	{
+		RAM,
+		TRAPAZOIDAL,
+		SIMPSONS,
+	};
+
+public:
 	/// @brief		Initializes the particle cloud that is saved 
 	///				in this ForceEngine.
 	///			
@@ -23,36 +31,36 @@ public:
 
 	const Cloud & cloud() const { return _cloud; }
 
-	/// @brief		Returns physical frame rate of simulation.
-	/// @details	Frequency at which iterations of the simulation are
+	///	@brief		Returns physical frame rate of simulation.
+	///	@details	Frequency at which iterations of the simulation are
 	///				executed.
-	/// @return		frame rate in (Hz)
+	///	@return		frame rate in (Hz)
 	float frameRate() const;
 
-	/// @brief		Sets physical frame rate of simulation.
-	/// @details	Frequency at which iterations of the simulation are
+	///	@brief		Sets physical frame rate of simulation.
+	///	@details	Frequency at which iterations of the simulation are
 	///				executed.
-	/// @param		rate frame rate in (Hz)
+	///	@param		rate frame rate in (Hz)
 	void frameRate(float rate);
 
-	/// @brief		Returns physical frame duration of simulation.
-	/// @details	Duration of each iteration of the simulation.
-	/// @return		Frame duration in units of seconds (Sec)
+	///	@brief		Returns physical frame duration of simulation.
+	///	@details	Duration of each iteration of the simulation.
+	///	@return		Frame duration in units of seconds (Sec)
 	float frameDuration() const;
 
-	/// @brief		Sets physical frame duration of simulation.
-	/// @details	Duration of each iteration of the simulation.
-	/// @param		frameDuration Frame duration in units of seconds (Sec)
+	///	@brief		Sets physical frame duration of simulation.
+	///	@details	Duration of each iteration of the simulation.
+	///	@param		frameDuration Frame duration in units of seconds (Sec)
 	void frameDuration(float frameDuration);
 
-	/// @brief		Speeds up or slows down simulation.
-	/// @details	Rate at which the simulation is speed up.
-	/// @return		rate
+	///	@brief		Speeds up or slows down simulation.
+	///	@details	Rate at which the simulation is speed up.
+	///	@return		rate
 	float timeScalar() const;
 
-	/// @brief		Speeds up or slows down simulation.
-	/// @details	Rate at which the simulation is speed up.
-	/// @param		timeScalar Range must be greater than 0.0:
+	///	@brief		Speeds up or slows down simulation.
+	///	@details	Rate at which the simulation is speed up.
+	///	@param		timeScalar Range must be greater than 0.0:
 	///					- ts < 0.0f			- invalid
 	///					- ts == 0.0f		- freezes simulation (not practical)
 	///					- 0.0f < ts < 1.0f	- slows simulation
@@ -62,18 +70,22 @@ public:
 	///	@return		rate
 	void timeScalar(float timeScalar);
 
+	void setIntegralApproximationMethod(
+		ForceEngine::IntegralApproximationMethod iam
+	);
+
 private:
-	/// @brief		Calculates the force of gravity applied to each particle
+	///	@brief		Calculates the force of gravity applied to each particle
 	///				in the cloud. 
-	/// @param		cloud A Cloud which contains mass and positions
-	/// @return		A ForceCloud storing the total gravitational force applied
+	///	@param		cloud A Cloud which contains mass and positions
+	///	@return		A ForceCloud storing the total gravitational force applied
 	///				to each particle in the cloud.
 	ForceCloud calcGravitationalForce(Cloud & cloud);
 
-	/// @brief		Calculates the force between charged particles applied to each
+	///	@brief		Calculates the force between charged particles applied to each
 	///				particle in the cloud.
-	/// @param		cloud A Cloud which contains mass, position and charge
-	/// @return		A ForceCloud storing the total Coulomb force applied 
+	///	@param		cloud A Cloud which contains mass, position and charge
+	///	@return		A ForceCloud storing the total Coulomb force applied 
 	///				to each particle in the cloud.
 	ForceCloud calcCoulombForce(Cloud & cloud);
 
@@ -108,11 +120,12 @@ private:
 
 	Cloud _cloud;
 
-	// TODO: add a queue of Clouds (circular buffer) to support
-	//		trapezoidal approximations and Simpsons rule
+	// A queue to support trapazoidal approximations and simpsons rule
 	boost::circular_buffer<AccelerationCloud> _accelerations = 
 		boost::circular_buffer<AccelerationCloud>(3);
 
 	boost::circular_buffer<VelocityCloud> _velocities = 
 		boost::circular_buffer<VelocityCloud>(2);
+	
+	IntegralApproximationMethod _iam = IntegralApproximationMethod::SIMPSONS;
 }; // class ForceEngine
