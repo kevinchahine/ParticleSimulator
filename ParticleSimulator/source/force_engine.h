@@ -6,11 +6,17 @@
 class ForceEngine
 {
 public:
-	enum IntegralApproximationMethod
+	enum IntegralApproximationMethod : uint8_t
 	{
 		RAM,
 		TRAPAZOIDAL,
 		SIMPSONS,
+	};
+
+	enum CalculationMethod : bool
+	{
+		SCALAR,
+		MATRIX,
 	};
 
 public:
@@ -74,7 +80,14 @@ public:
 		ForceEngine::IntegralApproximationMethod iam
 	);
 
+	void setCalculationMethod(
+		ForceEngine::CalculationMethod cm
+	);
+
 private:
+	ForceCloud calcGravitationalForceScalar(Cloud & cloud);
+	ForceCloud calcGravitationalForceMatrix(Cloud & cloud);
+
 	///	@brief		Calculates the force of gravity applied to each particle
 	///				in the cloud. 
 	///	@param		cloud A Cloud which contains mass and positions
@@ -128,4 +141,8 @@ private:
 		boost::circular_buffer<VelocityCloud>(2);
 	
 	IntegralApproximationMethod _iam = IntegralApproximationMethod::SIMPSONS;
+
+	CalculationMethod _cm = CalculationMethod::MATRIX;
+
+	float _deadZoneDist = 100.0f;
 }; // class ForceEngine

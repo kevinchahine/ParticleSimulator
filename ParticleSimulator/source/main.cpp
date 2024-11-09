@@ -44,11 +44,18 @@ void run() {
 	forceEngine.timeScalar(
 		//1.0f
 		//1000.0f
-		2.0e+8
+		2.0e+7
+		//2.0e+8
 		//6.67430e+13
 	);
 	forceEngine.setIntegralApproximationMethod(
+		//ForceEngine::IntegralApproximationMethod::RAM
+		//ForceEngine::IntegralApproximationMethod::TRAPAZOIDAL
 		ForceEngine::IntegralApproximationMethod::SIMPSONS
+	);
+	forceEngine.setCalculationMethod(
+		//ForceEngine::CalculationMethod::SCALAR
+		ForceEngine::CalculationMethod::MATRIX
 	);
 
 	Display display;
@@ -59,7 +66,7 @@ void run() {
 	sw.reset();
 	sw.start();
 
-	this_thread::sleep_for(chrono::milliseconds(50));
+	this_thread::sleep_for(chrono::milliseconds(100));
 	chrono::seconds epochTime(10);
 
 	int counter = 0;
@@ -68,7 +75,7 @@ void run() {
 		const Cloud & cloudRef = forceEngine.cloud();
 		
 		display.render(cloudRef);
-		//cv::Mat frame = display.getFrame();
+		cv::Mat frame = display.getFrame();
 		display.show();
 		
 		//videoWriter.write(frame);
